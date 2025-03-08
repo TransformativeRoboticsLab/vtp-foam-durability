@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def load_file():
     # Given csv filename, get database
-    file_path = '../data/pack_foam_sample_001_20250305_1.csv'  # Replace with file path
+    file_path = '../data/0500_kPa_sample_003_20250305_1000cycles.csv'  # Replace with file path
     # Read the CSV and skip the first two rows
     df = pd.read_csv(file_path, skiprows=2)
     # Check the data
@@ -24,14 +24,16 @@ def load_file():
 def plot_all_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
     print(type(col2))
-    plt.plot(col2[:1000], col3[:1000])
-    plt.xlim([-15, 0])
-    plt.ylim([-0.2, 0])
+    plt.plot(col2[:1000], col3[:1000], label="Start of 1000 cycles")
+    plt.plot(col2[-1000:], col3[-1000:], label="End of 1000 cycles")
+    plt.xlim([-13, 0])
+    plt.ylim([-0.04, 0])
     plt.legend()
     plt.grid()
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
-    plt.title('Plot of Initial Compression Cycles - Expanded Polyurethane 30 mm cube 2025/03/04')
+    plt.title('Plot of 1000 Compression Cycles - 0.5 MPa 30 mm Cube VTP 2025/03/04')
+    plt.savefig("./compression_cycling_plot.png")
     plt.show()
 
 def plot_zoomed_compression_data(col1, col2, col3):
