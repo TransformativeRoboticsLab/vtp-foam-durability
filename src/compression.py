@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def load_file():
     # Given csv filename, get database
-    file_path = '../data/0500_kPa_sample_003_20250305_1000cycles.csv'  # Replace with file path
+    file_path = '../data/5000kPa_001SA_1_1.csv'  # Replace with file path
     # Read the CSV and skip the first two rows
     df = pd.read_csv(file_path, skiprows=2)
     # Check the data
@@ -24,23 +24,26 @@ def load_file():
 def plot_all_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
     print(type(col2))
-    plt.plot(col2[:1000], col3[:1000], label="Start of 1000 cycles")
-    plt.plot(col2[-1000:], col3[-1000:], label="End of 1000 cycles")
-    plt.xlim([-13, 0])
-    plt.ylim([-0.04, 0])
+    plt.plot(col2[:180], col3[:180], label="Start of 1000 cycles")
+    plt.plot(col2[50040:50180], col3[50040:50180], label="At 250 cycles")
+    plt.plot(col2[100120:100300], col3[100120:100300], label="At 500 cycles")
+    plt.plot(col2[150050:150230], col3[150050:150230], label="At 750 cycles")
+    plt.plot(col2[-200:-20], col3[-200:-20], label="End of 1000 cycles")
+    # plt.xlim([-13, 0])
+    # plt.ylim([-0.04, 0])
     plt.legend()
     plt.grid()
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
-    plt.title('Plot of 1000 Compression Cycles - 0.5 MPa 30 mm Cube VTP 2025/03/04')
+    plt.title('Plot of Select Cycles in 1000 Compression Cycles - 5 MPa 30 mm Cube VTP 2025/03/07')
     plt.savefig("./compression_cycling_plot.png")
     plt.show()
 
 def plot_zoomed_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
     plt.plot(col2, col3)
-    plt.xlim([-14, -13.2])
-    plt.ylim([-0.038, -0.03])
+    # plt.xlim([-14, -13.2])
+    # plt.ylim([-0.038, -0.03])
     plt.legend()
     plt.grid()
     plt.xlabel('Deformation [mm]')
