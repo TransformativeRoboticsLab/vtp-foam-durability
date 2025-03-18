@@ -20,6 +20,14 @@ def load_file():
 
     return col1, col2, col3, sampled_rows
 
+def get_halved_csv_file(filename):
+    """
+    Given a filename, cut every other line and resave
+    """
+    df = pd.read_excel(filename,header=None)         # read file
+    df = df.drop(df.index[4::2])                     # drop every 2nd rows
+    df.to_excel('trimmed_' + filename,index=None,header=None)     # save file
+
 
 def plot_all_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
@@ -36,7 +44,7 @@ def plot_all_compression_data(col1, col2, col3):
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
     plt.title('Plot of Select Cycles in 1000 Compression Cycles - 5 MPa 30 mm Cube VTP 2025/03/07')
-    plt.savefig("./compression_cycling_plot.png")
+    plt.savefig("./compression_cycling_plot_5000kpa.png")
     plt.show()
 
 def plot_zoomed_compression_data(col1, col2, col3):
@@ -63,6 +71,8 @@ def plot_specific_compression_data(deformation_col, force_col):
 
 
 if __name__ == '__main__':
+    get_halved_csv_file("5000kPa_001SA_run2_10000cycle_2.csv")
+
     col1, col2, col3, s_rows = load_file()
     plot_all_compression_data(col1, col2, col3)
     # plot_zoomed_compression_data(col1, col2, col3)
