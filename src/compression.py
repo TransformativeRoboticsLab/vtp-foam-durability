@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 def load_file():
     # Given csv filename, get database
-    file_path = '../data/5000kPa_001SA_run2_10000cycle_2_half.csv'  # Replace with file path
+    file_path = '../data/0500kPa_003SA_10000cycles_to_20000cycles.csv'  # Replace with file path
     # Read the CSV and skip the first two rows
     df = pd.read_csv(file_path, skiprows=2)
     # Check the data
@@ -32,19 +32,19 @@ def get_halved_csv_file(filename):
 def plot_all_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
     print(type(col2))
-    plt.plot(col2[:180].subtract(19.5), col3[:180], label="Start of 10000 cycles")
-    plt.plot(col2[200040:200180].subtract(19.5), col3[200040:200180], label="At 2500 cycles")
-    plt.plot(col2[300120:300300].subtract(19.5), col3[300120:300300], label="At 5000 cycles")
-    plt.plot(col2[400050:400230].subtract(19.5), col3[400050:400230], label="At 7500 cycles")
-    plt.plot(col2[-200:-20].subtract(19.5), col3[-200:-20], label="End of 10000 cycles")
-    plt.xlim([-8, 0])
-    plt.ylim([-0.25, 0])
+    plt.plot(col2[:300], col3[:300], label="Start of 20000 cycles")
+    plt.plot(col2[200140:200360], col3[200140:200360], label="At 12500 cycles")
+    plt.plot(col2[300220:300440], col3[300220:300440], label="At 15000 cycles")
+    plt.plot(col2[400050:400300], col3[400050:400300], label="At 17500 cycles")
+    plt.plot(col2[-700:-450], col3[-700:-450], label="End of 20000 cycles")
+    # plt.xlim([-8, 0])
+    # plt.ylim([-0.25, 0])
     plt.legend()
     plt.grid()
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
-    plt.title('Plot of Select Cycles in 10000 Compressions - 5 MPa 30 mm Cube VTP 2025/03/17')
-    plt.savefig("./compression_cycling_plot_5000kpa_10000cycles_snapshots.png")
+    plt.title('Plot of Select Cycles in 20000 Compressions - 0.5 MPa 30 mm Cube VTP 2025/03/21')
+    plt.savefig("./compression_cycling_plot_0500kpa_10k_to_20k_cycles_snapshots.png")
     plt.show()
 
 def plot_zoomed_compression_data(col1, col2, col3):
@@ -56,8 +56,8 @@ def plot_zoomed_compression_data(col1, col2, col3):
     plt.grid()
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
-    plt.title('Plot of 10000 Compressions Zoomed In - 5 MPa 30 mm Cube VTP 2025/03/17')
-    plt.savefig("./compression_cycling_plot_zoomed_5000kpa_10000cycles.png")
+    plt.title('Plot of 20000 Compressions Zoomed In - 5 MPa 30 mm Cube VTP 2025/03/21')
+    plt.savefig("./compression_cycling_plot_zoomed_0500kpa_10k_to_20k_cycles.png")
     plt.show()
 
 
