@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 
 def load_file():
     # Given csv filename, get database
-    file_path = '../data/0500kPa_003SA_10000cycles_to_20000cycles.csv'  # Replace with file path
+    file_path = '../data/100kcycle_0500MPa_1prepped.csv'  # Replace with file path
     # Read the CSV and skip the first two rows
     df = pd.read_csv(file_path, skiprows=2)
     # Check the data
     print(df.head())
-    # Convert columns to plottable data types
+    # Convert columns to plottable data types if not already
     col1 = df.iloc[:, 0].astype(float)  # First column as floats
     col2 = df.iloc[:, 1].astype(float)  # Second column as floats
     col3 = df.iloc[:, 2].astype(float)  # Third column as floats
@@ -20,32 +20,47 @@ def load_file():
 
     return col1, col2, col3, sampled_rows
 
-def get_halved_csv_file(filename):
-    """
-    Given a filename, cut every other line and resave
-    """
-    df = pd.read_csv(filename,header=None)         # read file
-    df = df.drop(df.index[4::2])                     # drop every 2nd rows
-    df.to_csv(filename[:39] + "test.csv",index=None,header=None)     # save file
+
+def load_file_2():
+    # Given csv filename, get database
+    file_path = '../data/0500kPa_003SA_10000cycles_to_20000cycles.csv'  # Replace with file path
+    # Read the CSV and skip the first two rows
+    df = pd.read_csv(file_path, skiprows=2)
+    # Check the data
+    print(df.head())
+    # Convert columns to plottable data types if not already
+    col1_2 = df.iloc[:, 0].astype(float)  # First column as floats
+    col2_2 = df.iloc[:, 1].astype(float)  # Second column as floats
+    col3_2 = df.iloc[:, 2].astype(float)  # Third column as floats
+    # Take every 515th row and save to a list
+    sampled_rows_2 = df.iloc[::515].astype(float)
+    print("Sampled rows:", sampled_rows_2)
+
+    return col1_2, col2_2, col3_2, sampled_rows_2
 
 
-def plot_all_compression_data(col1, col2, col3):
+def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2):
     plt.figure(figsize=(8, 6))
     print(type(col2))
-    plt.plot(col2[:300], col3[:300], label="Start of 20000 cycles")
-    plt.plot(col2[200140:200360], col3[200140:200360], label="At 12500 cycles")
-    plt.plot(col2[300220:300440], col3[300220:300440], label="At 15000 cycles")
-    plt.plot(col2[400050:400300], col3[400050:400300], label="At 17500 cycles")
-    plt.plot(col2[-700:-450], col3[-700:-450], label="End of 20000 cycles")
+    plt.plot(col2, col3, label="At 100 Kilocycles Sawzall")
+    plt.plot(col2_2[:300], col3_2[:300], label="At 1000 cycles Instron (start)")
+    plt.plot(col2_2[-700:-430].add(3), col3_2[-700:-430], label="At 20000 cycles Instron (end)")
+    # plt.plot(col2[:300], col3[:300], label="Start of 20000 cycles")
+    # plt.plot(col2[200140:200360], col3[200140:200360], label="At 12500 cycles")
+    # plt.plot(col2[300220:300440], col3[300220:300440], label="At 15000 cycles")
+    # plt.plot(col2[400050:400300], col3[400050:400300], label="At 17500 cycles")
+    # plt.plot(col2[-700:-450], col3[-700:-450], label="End of 20000 cycles")
     # plt.xlim([-8, 0])
     # plt.ylim([-0.25, 0])
+
     plt.legend()
     plt.grid()
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
-    plt.title('Plot of Select Cycles in 20000 Compressions - 0.5 MPa 30 mm Cube VTP 2025/03/21')
-    plt.savefig("./compression_cycling_plot_0500kpa_10k_to_20k_cycles_snapshots.png")
+    plt.title('Plot at 100k and 1k cycles - 0.5 MPa 30 mm Cube VTP 2025/03/31')
+    plt.savefig("./compression_cycle_plot_0500kpa_at_100kilocycles.png")
     plt.show()
+
 
 def plot_zoomed_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
@@ -56,8 +71,8 @@ def plot_zoomed_compression_data(col1, col2, col3):
     plt.grid()
     plt.xlabel('Deformation [mm]')
     plt.ylabel('Force [kN]')
-    plt.title('Plot of 20000 Compressions Zoomed In - 5 MPa 30 mm Cube VTP 2025/03/21')
-    plt.savefig("./compression_cycling_plot_zoomed_0500kpa_10k_to_20k_cycles.png")
+    plt.title('Plot at 100k and 1k cycles Zoomed In - 5 MPa 30 mm Cube VTP 2025/03/31')
+    plt.savefig("./compression_cycle_plot_zoomed_0500kpa_at_100kilocycles.png")
     plt.show()
 
 
@@ -72,10 +87,11 @@ def plot_specific_compression_data(deformation_col, force_col):
 
 
 if __name__ == '__main__':
-    get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
+    # get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
 
     col1, col2, col3, s_rows = load_file()
-    plot_all_compression_data(col1, col2, col3)
+    col1_2, col2_2, col3_2, s_rows_2 = load_file_2()
+    plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2)
     # plot_zoomed_compression_data(col1, col2, col3)
     # s_col1 = s_rows.iloc[:, 1].astype(float)
     # s_col2 = s_rows.iloc[:, 2].astype(float)
