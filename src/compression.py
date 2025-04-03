@@ -1,4 +1,5 @@
 # VTP Compression Durability Analysis
+# Jacob Miske
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -17,7 +18,6 @@ def load_file():
     # Take every 515th row and save to a list
     sampled_rows = df.iloc[::515].astype(float)
     print("Sampled rows:", sampled_rows)
-
     return col1, col2, col3, sampled_rows
 
 
@@ -35,8 +35,17 @@ def load_file_2():
     # Take every 515th row and save to a list
     sampled_rows_2 = df.iloc[::515].astype(float)
     print("Sampled rows:", sampled_rows_2)
-
     return col1_2, col2_2, col3_2, sampled_rows_2
+
+
+def get_stress_strain_from_data(displacement, force, area, start_length):
+    """
+    Given force, area, displacement, and L0
+    return stress and strain data
+    """
+    epsilon = [i/start_length for i in displacement]
+    sigma = [j/area for j in force]
+    return epsilon, sigma
 
 
 def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2):
@@ -89,9 +98,20 @@ def plot_specific_compression_data(deformation_col, force_col):
 if __name__ == '__main__':
     # get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
 
-    col1, col2, col3, s_rows = load_file()
-    col1_2, col2_2, col3_2, s_rows_2 = load_file_2()
-    plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2)
+    time0, disp0, force0, s_rows = load_file()
+    time1, disp1, force1, s_rows_2 = load_file_2()
+    area0 = 0.0009 # square meters
+    area1 = 0.0009 # square meters
+    area2 = 0.0009 # square meters
+    L0_0 = 0.03*1000 # millimeters
+    L0_1 = 0.0290*1000 # millimeters
+    L0_2 = 0.0295*1000 # millimeters
+
+    strain0, stress0 = get_stress_strain_from_data(displacement=list(disp0), force=list(force0), area=area0, start_length=L0_0)
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area1, start_length=L0_1)
+    print(strain0)
+
+    plot_all_compression_data(time0, disp0, force0, time1, disp1, force1)
     # plot_zoomed_compression_data(col1, col2, col3)
     # s_col1 = s_rows.iloc[:, 1].astype(float)
     # s_col2 = s_rows.iloc[:, 2].astype(float)
