@@ -53,7 +53,7 @@ def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2):
     print(type(col2))
     plt.plot(col2, col3, label="At 100 Kilocycles Sawzall")
     plt.plot(col2_2[:300], col3_2[:300], label="At 1000 cycles Instron (start)")
-    plt.plot(col2_2[-700:-430].add(3), col3_2[-700:-430], label="At 20000 cycles Instron (end)")
+    # plt.plot(col2_2[-700:-430], col3_2[-700:-430], label="At 20000 cycles Instron (end)")
     # plt.plot(col2[:300], col3[:300], label="Start of 20000 cycles")
     # plt.plot(col2[200140:200360], col3[200140:200360], label="At 12500 cycles")
     # plt.plot(col2[300220:300440], col3[300220:300440], label="At 15000 cycles")
@@ -64,10 +64,10 @@ def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2):
 
     plt.legend()
     plt.grid()
-    plt.xlabel('Deformation [mm]')
-    plt.ylabel('Force [kN]')
+    plt.xlabel('Strain')
+    plt.ylabel('Stress [kPa]')
     plt.title('Plot at 100k and 1k cycles - 0.5 MPa 30 mm Cube VTP 2025/03/31')
-    plt.savefig("./compression_cycle_plot_0500kpa_at_100kilocycles.png")
+    plt.savefig("./stress_strain_compression_cycle_plot_0500kpa_at_100kilocycles.png")
     plt.show()
 
 
@@ -109,9 +109,13 @@ if __name__ == '__main__':
 
     strain0, stress0 = get_stress_strain_from_data(displacement=list(disp0), force=list(force0), area=area0, start_length=L0_0)
     strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area1, start_length=L0_1)
-    print(strain0)
+    # Convert to positive
+    strain0 = [-i for i in strain0]
+    strain1 = [-i for i in strain1]
+    stress0 = [-i for i in stress0]
+    stress1 = [-i for i in stress1]
 
-    plot_all_compression_data(time0, disp0, force0, time1, disp1, force1)
+    plot_all_compression_data(time0, strain0, stress0, time1, strain1, stress1)
     # plot_zoomed_compression_data(col1, col2, col3)
     # s_col1 = s_rows.iloc[:, 1].astype(float)
     # s_col2 = s_rows.iloc[:, 2].astype(float)
