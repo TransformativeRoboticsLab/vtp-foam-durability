@@ -21,6 +21,24 @@ def load_file(file_name):
     return col1, col2, col3, sampled_rows
 
 
+def load_file_3pb(file_name):
+    # Given csv filename, get database
+    # file_path = '../data/100kcycle_0500MPa_1prepped.csv'  # Replace with file path
+    # Read the CSV and skip the first two rows
+    df = pd.read_csv(file_name, skiprows=2)
+    # Check the data
+    print(df.head())
+    # Convert columns to plottable data types if not already
+    col1 = df.iloc[:, 1] # .astype(float)  # First column as floats
+    col2 = df.iloc[:, 3] # .astype(float)  # Second column as floats
+    col3 = df.iloc[:, 4] # .astype(float)  # Third column as floats
+    # Take every 515th row and save to a list
+    sampled_rows = df.iloc[::515].astype(float)
+    print("Sampled rows:", sampled_rows)
+    # time, flex displacement, flexural stress
+    return col1, col2, col3, sampled_rows
+
+
 # def load_file_2():
 #     # Given csv filename, get database
 #     file_path = '../data/0500kPa_003SA_10000cycles_to_20000cycles.csv'  # Replace with file path
@@ -43,9 +61,20 @@ def get_stress_strain_from_data(displacement, force, area, start_length):
     Given force, area, displacement, and L0
     return stress and strain data
     """
-    epsilon = [i/start_length for i in displacement]
-    sigma = [j/area for j in force]
+    epsilon = [float(i)/start_length for i in displacement]
+    sigma = [float(j)/area for j in force]
     return epsilon, sigma
+
+
+def get_flexural_stress_strain_from_data(displacement, force, area, start_length):
+    """
+    Given force, area, displacement, and L0
+    return stress and strain data
+    """
+    epsilon = [float(i)/start_length for i in displacement]
+    sigma = [float(j)/(1000*area) for j in force]
+    return epsilon, sigma
+
 
 def plot_compression_data(col1, col2, col3, plot_title, file_name):
     plt.figure(figsize=(8, 6))
@@ -70,7 +99,7 @@ def plot_3pointbend_data(col1, col2, col3, plot_title, file_name):
     plt.plot(col2, col3, label="Three Point Bend")
     plt.legend()
     plt.grid()
-    plt.xlabel('Strain')
+    plt.xlabel('Flexural Strain')
     plt.ylabel('Shear Stress [kPa]')
     plt.title(plot_title)
     plt.savefig(file_name)
@@ -127,7 +156,8 @@ def plot_specific_compression_data(deformation_col, force_col):
 
 if __name__ == '__main__':
     # get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
-    time_3pb, disp_3pb, force_3pb, s_rows_3pb = load_file(file_name='../data/5000kPa-thick2_1_3pointbend.csv')
+    time_3pb_5MPa_thick, disp_3pb_5MPa_thick, force_3pb_5MPa_thick, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa-thick2_1_3pointbend.csv')
+    # time_3pb_5MPa_thin, disp_3pb_5MPa_thin, force_3pb_5MPa_thin, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa-thin2_5_3pointbend.csv')
 
     time0, disp0, force0, s_rows = load_file(file_name='../data/5000kPa001SA006SP_100kcycle_comp_1.csv')
     time1, disp1, force1, s_rows_2 = load_file(file_name="../data/5000kPa_001SA_1_1.csv")
@@ -138,8 +168,11 @@ if __name__ == '__main__':
     L0_1 = 0.0290*1000 # millimeters
     L0_2 = 0.0295*1000 # millimeters
 
-    strain_3pb, stress_3pb = get_stress_strain_from_data(displacement=list(disp_3pb), force=list(force_3pb), area=area0, start_length=L0_0)
+    # TODO: modify area and length for shear stress and strain
+    strain_3pb_5MPa_thick, stress_3pb_5MPa_thick = get_flexural_stress_strain_from_data(displacement=list(disp_3pb_5MPa_thick), force=list(force_3pb_5MPa_thick), area=area0, start_length=L0_0)
+    # strain_3pb_5MPa_thin, stress_3pb_5MPa_thin = get_stress_strain_from_data(displacement=list(disp_3pb_5MPa_thin), force=list(force_3pb_5MPa_thin), area=area0, start_length=L0_0)
 
+    # Compression stress and strain
     strain0, stress0 = get_stress_strain_from_data(displacement=list(disp0), force=list(force0), area=area0, start_length=L0_0)
     strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area1, start_length=L0_1)
     # Convert to positive
@@ -150,7 +183,12 @@ if __name__ == '__main__':
 
     plot_compression_data(time0, strain0, stress0, plot_title="Plot at 100k - 5 MPa 30 mm Cube VTP 2025/04/07", file_name="./5MPa_100kilocycles_20250407.png")
     plot_all_compression_data(time0, strain0, stress0, time1, strain1, stress1, plot_title="5 MPa 1k vs 100k cycle compression", file_name="./5MPa_comp_comparison_20250407.png")
-    plot_3pointbend_data()
+
+    plot_3pointbend_data(time0, strain_3pb_5MPa_thick, stress_3pb_5MPa_thick, plot_title="Three Point Bend Shear Stress and Strain", file_name="./5MPa_3pb_20250416.png")
+    # plot_3pointbend_data(time0, strain_3pb_5MPa_thin, stress_3pb_5MPa_thin, plot_title="Three Point Bend Shear Stress and Strain - Thin Samples", file_name="./5MPa_3pb_thin_20250416.png")
+
+    
+    
     # plot_zoomed_compression_data(col1, col2, col3)
     # s_col1 = s_rows.iloc[:, 1].astype(float)
     # s_col2 = s_rows.iloc[:, 2].astype(float)
