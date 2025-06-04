@@ -1,6 +1,7 @@
 # VTP Compression Durability Analysis
 # Jacob Miske
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -76,12 +77,52 @@ def get_flexural_stress_strain_from_data(displacement, force, area, start_length
     return epsilon, sigma
 
 
+def plot_force_displacement(col1, col2, plot_title, file_name):
+    """
+    Take data from Instron force and displacement and plot relative
+    """
+    # Convert to Newtons
+    col2 = [1000*i for i in col2]
+    # Get initial linear fit
+    linear_coeffs = np.polyfit(col1[:80], col2[0:80], 1)
+    y_line = [i * linear_coeffs[0] + linear_coeffs[1] for i in col1]
+    # Get second order fit
+    second_order_coeffs = np.polyfit(col1, col2, 3)
+    y_arc = [i**2 * second_order_coeffs[0] + i * second_order_coeffs[1] + second_order_coeffs[2] for i in col1]
+    # Make plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.plot(col1, col2, label="TPU Filament (130 mm)")
+    plt.plot(col1, y_line, label="Linear Fit", linestyle='dashed')
+    plt.plot(col1, y_arc, label="Second Order Fit", linestyle='dashed')
+    # place a text box in upper left in axes coords
+    ax.text(0.07, 0.92, "Force to Displacement Ratio: " + str(round(linear_coeffs[0], 2)) + " N/mm", transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+    plt.legend()
+    plt.grid()
+    plt.xlabel('Displacement (mm)')
+    plt.ylabel('Force [N]')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+    return 0
+
 def plot_compression_data(col1, col2, col3, plot_title, file_name):
-    plt.figure(figsize=(8, 6))
-    print(type(col2))
-    plt.plot(col2, col3, label="Baked")
-    # plt.xlim([-8, 0])
-    # plt.ylim([-0.25, 0])
+    """
+    """
+    # convert stress to Pa
+    col3 = [1000*i for i in col3]
+    # Get initial linear fit
+    linear_coeffs = np.polyfit(col2[:200], col3[0:200], 1)
+    y_line = [i * linear_coeffs[0] + linear_coeffs[1] for i in col2]
+    # Make plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.plot(col2, col3, label="TPU Filament")
+    plt.plot(col2, y_line, label="Linear Fit", linestyle='dashed')
+    # place a text box in upper left in axes coords
+    ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+    # plt.xlim([0, 0.5])
+    # plt.ylim([0, 0.01])
     plt.legend()
     plt.grid()
     plt.xlabel('Strain')
@@ -89,6 +130,7 @@ def plot_compression_data(col1, col2, col3, plot_title, file_name):
     plt.title(plot_title)
     plt.savefig(file_name)
     plt.show()
+    return 0
 
 
 def plot_3pointbend_data(col1, col2, col3, plot_title, file_name):
@@ -161,6 +203,22 @@ def plot_specific_compression_data(deformation_col, force_col):
 
 
 if __name__ == '__main__':
+    # Filament pull data
+    time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/TPU_filament_pull_1.csv')
+    plot_force_displacement(col1=disp_filament, col2=force_filament, plot_title="Ninjaflex TPU 85A Filament Force to Displacement", file_name="./TPU_F_to_disp.png")
+    area1 = 2.4 # mm squared
+    L0_1 = 130 # mm
+    strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
+    # Convert to positive
+    # strain0 = [-i for i in strain0]
+    # strain1 = [-i for i in strain_filament]
+    # # stress0 = [-i for i in stress0]
+    # stress1 = [-i for i in stress_filament]
+
+    plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="Ninjaflex TPU 85A Filament Stress to Strain", file_name="./TPU_filament_stress_strain.png")
+    
+
+    quit()
     # get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
     time_3pb_5MPa_thick, disp_3pb_5MPa_thick, force_3pb_5MPa_thick, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa_001SA_Ab_001SP_Flexural_1_1.csv')
     # time_3pb_5MPa_thin, disp_3pb_5MPa_thin, force_3pb_5MPa_thin, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa-thin2_5_3pointbend.csv')
