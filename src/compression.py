@@ -63,7 +63,8 @@ def get_stress_strain_from_data(displacement, force, area, start_length):
     return stress and strain data
     """
     epsilon = [float(i)/start_length for i in displacement]
-    sigma = [float(j)/area for j in force]
+    # in MPa
+    sigma = [1000*float(j)/area for j in force]
     return epsilon, sigma
 
 
@@ -76,6 +77,14 @@ def get_flexural_stress_strain_from_data(displacement, force, area, start_length
     sigma = [float(j)/(1000*area) for j in force]
     return epsilon, sigma
 
+def get_positive_form(strain, stress):
+    """
+    """
+    # Convert to positive
+    epsilon = [-i for i in strain]
+    sigma = [-i for i in stress]
+    print(sigma[-10:])
+    return epsilon, sigma
 
 def plot_force_displacement(col1, col2, plot_title, file_name):
     """
@@ -106,17 +115,18 @@ def plot_force_displacement(col1, col2, plot_title, file_name):
     plt.show()
     return 0
 
+
 def plot_compression_data(col1, col2, col3, plot_title, file_name):
     """
     """
-    # convert stress to Pa
-    col3 = [1000*i for i in col3]
+    # convert stress
+    col3 = [i for i in col3]
     # Get initial linear fit
-    linear_coeffs = np.polyfit(col2[:200], col3[0:200], 1)
+    linear_coeffs = np.polyfit(col2[:], col3[:], 1)
     y_line = [i * linear_coeffs[0] + linear_coeffs[1] for i in col2]
     # Make plot
     fig, ax = plt.subplots(figsize=(8, 6))
-    plt.plot(col2, col3, label="TPU Filament")
+    plt.plot(col2, col3, label="Sample")
     plt.plot(col2, y_line, label="Linear Fit", linestyle='dashed')
     # place a text box in upper left in axes coords
     ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
@@ -126,7 +136,7 @@ def plot_compression_data(col1, col2, col3, plot_title, file_name):
     plt.legend()
     plt.grid()
     plt.xlabel('Strain')
-    plt.ylabel('Stress [kPa]')
+    plt.ylabel('Stress [MPa]')
     plt.title(plot_title)
     plt.savefig(file_name)
     plt.show()
@@ -178,6 +188,48 @@ def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2, plot_tit
     plt.show()
 
 
+def plot_four_compression_data_figure4(strain1, stress1, strain2, stress2, strain3, stress3, strain4, stress4, plot_title, file_name):
+    plt.figure(figsize=(8, 6))
+    # pre process to adjust zero points
+    strain1 = [i - 0.11 for i in strain1]
+    strain3 = [i - 0.02 for i in strain3]
+    strain4 = [i - 0.01 for i in strain4]
+    plt.plot(strain1, stress1, label="0.5 MPa Initial")
+    plt.plot(strain2, stress2, label="0.5 MPa at 1E5 Cycles")
+    plt.plot(strain3, stress3, label="5.0 MPa Initial")
+    plt.plot(strain4, stress4, label="5.0 MPa at 1E5 Cycles")
+    plt.xlim([0, 0.3])
+    plt.ylim([0, 0.2])
+    plt.legend()
+    plt.grid()
+    plt.xlabel('Strain')
+    plt.ylabel('Stress [MPa]')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+
+
+def plot_four_compression_data(strain1, stress1, strain2, stress2, strain3, stress3, strain4, stress4, plot_title, file_name):
+    plt.figure(figsize=(8, 6))
+    # pre process to adjust zero points
+    strain1 = [i - 0.11 for i in strain1]
+    strain3 = [i - 0.02 for i in strain3]
+    strain4 = [i - 0.01 for i in strain4]
+    plt.plot(strain1, stress1, label="0.5 MPa Initial")
+    plt.plot(strain2, stress2, label="0.5 MPa at 1E5 Cycles")
+    plt.plot(strain3, stress3, label="5.0 MPa Initial")
+    plt.plot(strain4, stress4, label="5.0 MPa at 1E5 Cycles")
+    plt.xlim([0, 0.3])
+    plt.ylim([0, 0.2])
+    plt.legend()
+    plt.grid()
+    plt.xlabel('Strain')
+    plt.ylabel('Stress [MPa]')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+
+
 def plot_zoomed_compression_data(col1, col2, col3):
     plt.figure(figsize=(8, 6))
     plt.plot(col2, col3)
@@ -203,39 +255,80 @@ def plot_specific_compression_data(deformation_col, force_col):
 
 
 if __name__ == '__main__':
-    # Filament pull data
-    time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/TPU_filament_pull_1.csv')
-    plot_force_displacement(col1=disp_filament, col2=force_filament, plot_title="Ninjaflex TPU 85A Filament Force to Displacement", file_name="./TPU_F_to_disp.png")
-    area1 = 2.4 # mm squared
-    L0_1 = 130 # mm
+    # Figure 4. Stress Strain Curves for Different Density
+    area = 900  # mm squared
+    L0 = 30     # mm
+    time1, disp1, force1, s_rows = load_file(file_name='../data/0500kPa001SA003SP_1k.csv')
+    time2, disp2, force2, s_rows = load_file(file_name='../data/0500kPa001SA006SP_100k.csv')
+    time3, disp3, force3, s_rows = load_file(file_name='../data/5000kPa001SA006SP_1.csv')
+    time4, disp4, force4, s_rows = load_file(file_name='../data/5000kPa001SA006SP_100k.csv')
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
+    strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area, start_length=L0)
+    strain3, stress3 = get_stress_strain_from_data(displacement=list(disp3), force=list(force3), area=area, start_length=L0)
+    strain4, stress4 = get_stress_strain_from_data(displacement=list(disp4), force=list(force4), area=area, start_length=L0)
+    # convert old instron data to position format
+    strain1, stress1 = get_positive_form(strain=strain1, stress=stress1)
+    strain3, stress3 = get_positive_form(strain=strain3, stress=stress3)
+    plot_four_compression_data(strain1[:230], stress1[:230], strain2, stress2, strain3[:100], stress3[:100], strain4, stress4, plot_title="Different Modulus in Cycled VTP Foam Stress to Strain", file_name="./figure4_0500kPa_to_5000kPa_comparison.png")
+
+    quit()
+
+    # Abrasion Slab Effective Modulus sample 12000 kPa Surface coat
+    time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/6000kPa_E_Ab_12000kPaSurfaceCoat_002SP_1.csv')
+    area1 = 3200 # mm squared
+    L0_1 = 8.9 # mm
     strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
+    plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="5.9 MPa Equivalent Slab with 12 MPa Surface Stress to Strain", file_name="./5900kPa_Eq_12000kPa_coat_stress_strain_002SP.png")
+
+
+    # Abrasion Slab Effective Modulus sample 1
+    # time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/1000kPa001SA_E_Ab_2000kPaSurfaceCoat_1.csv')
+    # area1 = 3200 # mm squared
+    # L0_1 = 8.9 # mm
+    # strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
+    # plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="1 MPa Equivalent Slab with 2 MPa surface Stress to Strain", file_name="./1MPa_Eq_2MPa_coat_stress_strain_001SP.png")
+    # # Abrasion Slab Effective Modulus sample 2
+    # time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/1000kPa001SA_E_Ab_2000kPaSurfaceCoat_2.csv')
+    # area1 = 3200 # mm squared
+    # L0_1 = 8.9 # mm
+    # strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
+    # plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="1 MPa Equivalent Slab with 2 MPa surface Stress to Strain", file_name="./1MPa_Eq_2MPa_coat_stress_strain_002SP.png")
+
+
+    # Filament pull data
+    # time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/TPU_filament_pull_1.csv')
+    # plot_force_displacement(col1=disp_filament, col2=force_filament, plot_title="Ninjaflex TPU 85A Filament Force to Displacement", file_name="./TPU_F_to_disp.png")
+    # area1 = 2.4 # mm squared
+    # L0_1 = 130 # mm
+    # strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
     # Convert to positive
     # strain0 = [-i for i in strain0]
     # strain1 = [-i for i in strain_filament]
     # # stress0 = [-i for i in stress0]
     # stress1 = [-i for i in stress_filament]
-
-    plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="Ninjaflex TPU 85A Filament Stress to Strain", file_name="./TPU_filament_stress_strain.png")
+    # plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="Ninjaflex TPU 85A Filament Stress to Strain", file_name="./TPU_filament_stress_strain.png")
     
 
-    quit()
     # get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
-    time_3pb_5MPa_thick, disp_3pb_5MPa_thick, force_3pb_5MPa_thick, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa_001SA_Ab_001SP_Flexural_1_1.csv')
+    # time_3pb_5MPa_thick, disp_3pb_5MPa_thick, force_3pb_5MPa_thick, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa_001SA_Ab_001SP_Flexural_1_1.csv')
     # time_3pb_5MPa_thin, disp_3pb_5MPa_thin, force_3pb_5MPa_thin, s_rows_3pb_5MPa_thick = load_file_3pb(file_name='../data/5000kPa-thin2_5_3pointbend.csv')
+    # TODO: modify area and length for shear stress and strain
+    # strain_3pb_5MPa_thick, stress_3pb_5MPa_thick = get_flexural_stress_strain_from_data(displacement=list(disp_3pb_5MPa_thick), force=list(force_3pb_5MPa_thick), area=area0, start_length=L0_0)
+    # strain_3pb_5MPa_thin, stress_3pb_5MPa_thin = get_stress_strain_from_data(displacement=list(disp_3pb_5MPa_thin), force=list(force_3pb_5MPa_thin), area=area0, start_length=L0_0)
+    # plot_3pointbend_data(time0, strain_3pb_5MPa_thick, stress_3pb_5MPa_thick, plot_title="Flexural 1000 cycle Shear Stress and Strain", file_name="./5MPa_3pb_20250507_1000cycle.png")
+    # plot_3pointbend_data(time0, strain_3pb_5MPa_thin, stress_3pb_5MPa_thin, plot_title="Three Point Bend Shear Stress and Strain - Thin Samples", file_name="./5MPa_3pb_thin_20250416.png")
 
+    
+
+    # Cube Specimen Stress vs Strain
     time0, disp0, force0, s_rows = load_file(file_name='../data/5000kPa001SA007SP_baked80C_1.csv')
     time1, disp1, force1, s_rows_2 = load_file(file_name="../data/5000kPa_001SA_1_1.csv")
-    area0 = 0.0009 # square meters
-    area1 = 0.0009 # square meters
-    area2 = 0.0009 # square meters
-    L0_0 = 0.03*1000 # millimeters
-    L0_1 = 0.0290*1000 # millimeters
-    L0_2 = 0.0295*1000 # millimeters
-
-    # TODO: modify area and length for shear stress and strain
-    strain_3pb_5MPa_thick, stress_3pb_5MPa_thick = get_flexural_stress_strain_from_data(displacement=list(disp_3pb_5MPa_thick), force=list(force_3pb_5MPa_thick), area=area0, start_length=L0_0)
-    # strain_3pb_5MPa_thin, stress_3pb_5MPa_thin = get_stress_strain_from_data(displacement=list(disp_3pb_5MPa_thin), force=list(force_3pb_5MPa_thin), area=area0, start_length=L0_0)
-
+    area0 = 900 # square millimeters
+    area1 = 900 # square millimeters
+    area2 = 900 # square millimeters
+    L0_0 = 30 # millimeters
+    L0_1 = 29.0 # millimeters
+    L0_2 = 29.5 # millimeters
     # Compression stress and strain
     strain0, stress0 = get_stress_strain_from_data(displacement=list(disp0), force=list(force0), area=area0, start_length=L0_0)
     strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area1, start_length=L0_1)
@@ -244,13 +337,21 @@ if __name__ == '__main__':
     strain1 = [-i for i in strain1]
     # stress0 = [-i for i in stress0]
     stress1 = [-i for i in stress1]
-
     plot_compression_data(time0, strain0, stress0, plot_title="5 MPa Baked 80C Cube 2025/05/07", file_name="./5000kPa001SA007SP_baked.png")
-    plot_all_compression_data(time0, strain0, stress0, time1, strain1, stress1, plot_title="5 MPa Baked vs Unbaked Compression", file_name="./5000kPa_unbaked_vs_baked.png")
+    # plot_all_compression_data(time0, strain0, stress0, time1, strain1, stress1, plot_title="5 MPa Baked vs Unbaked Compression", file_name="./5000kPa_unbaked_vs_baked.png")
 
-    plot_3pointbend_data(time0, strain_3pb_5MPa_thick, stress_3pb_5MPa_thick, plot_title="Flexural 1000 cycle Shear Stress and Strain", file_name="./5MPa_3pb_20250507_1000cycle.png")
-    # plot_3pointbend_data(time0, strain_3pb_5MPa_thin, stress_3pb_5MPa_thin, plot_title="Three Point Bend Shear Stress and Strain - Thin Samples", file_name="./5MPa_3pb_thin_20250416.png")
-
+    # Cube cyclic testing
+    time0, disp0, force0, s_rows = load_file(file_name='../data/5000kPa001SA006SP_100kcycle_comp_1.csv')
+    area0 = 900 # square millimeters
+    L0_0 = 30 # millimeters
+    # Compression stress and strain
+    strain0, stress0 = get_stress_strain_from_data(displacement=list(disp0), force=list(force0), area=area0, start_length=L0_0)
+    # Convert to positive
+    # strain0 = [-i for i in strain0]
+    strain1 = [-i for i in strain1]
+    # stress0 = [-i for i in stress0]
+    stress1 = [-i for i in stress1]
+    plot_compression_data(time0, strain0, stress0, plot_title="5 MPa cube at 100k cycle", file_name="./5000kPa001SA006SP_100k_cycle.png")
     
     
     # plot_zoomed_compression_data(col1, col2, col3)
