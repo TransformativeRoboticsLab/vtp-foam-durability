@@ -56,6 +56,20 @@ def load_file_3pb(file_name):
 #     print("Sampled rows:", sampled_rows_2)
 #     return col1_2, col2_2, col3_2, sampled_rows_2
 
+def set_file_to_positive_force_displacement(file_name, new_file_name):
+    """
+    For files with negative force and displacement, convert to positive
+    """
+    # Given csv filename, get database
+    # file_path = '../data/100kcycle_0500MPa_1prepped.csv'  # Replace with file path
+    # Read the CSV and skip the first two rows
+    df = pd.read_csv(file_name, skiprows=2)
+    # Check the data
+    print(df.head())
+    # Invert the sign of the second and third columns
+    df.iloc[:, 1:3] = -df.iloc[:, 1:3]    
+    df.to_csv(new_file_name, index=False)
+    return 0
 
 def get_stress_strain_from_data(displacement, force, area, start_length):
     """
@@ -189,15 +203,29 @@ def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2, plot_tit
 
 
 def plot_four_compression_data_figure4(strain1, stress1, strain2, stress2, strain3, stress3, strain4, stress4, plot_title, file_name):
-    plt.figure(figsize=(8, 6))
+    # Get linear fits
+    linear_coeffs1 = np.polyfit(strain1[:230], stress1[:230], 1)
+    y_line1 = [i * linear_coeffs1[0] + linear_coeffs1[1] for i in strain1]
+    linear_coeffs2 = np.polyfit(strain2[:1000], stress2[:1000], 1)
+    y_line2 = [i * linear_coeffs2[0] + linear_coeffs2[1] for i in strain2]
+    linear_coeffs3 = np.polyfit(strain3[:100], stress3[:100], 1)
+    y_line3 = [i * linear_coeffs3[0] + linear_coeffs3[1] for i in strain3]
+    linear_coeffs4 = np.polyfit(strain4[:], stress4[:], 1)
+    y_line4 = [i * linear_coeffs4[0] + linear_coeffs4[1] for i in strain4]
+    # generate figure
+    fig, ax = plt.subplots(figsize=(8, 6))
     # pre process to adjust zero points
     strain1 = [i - 0.11 for i in strain1]
     strain3 = [i - 0.02 for i in strain3]
     strain4 = [i - 0.01 for i in strain4]
-    plt.plot(strain1, stress1, label="0.5 MPa Initial")
-    plt.plot(strain2, stress2, label="0.5 MPa at 1E5 Cycles")
-    plt.plot(strain3, stress3, label="5.0 MPa Initial")
-    plt.plot(strain4, stress4, label="5.0 MPa at 1E5 Cycles")
+    plt.plot(strain1, stress1, label="Low ρ Initial", color="#ff0000")
+    plt.plot(strain2, stress2, label="Low ρ at 1E5 Cycles", color="#b50000")
+    plt.plot(strain3, stress3, label="High ρ Initial", color="#0000ff")
+    plt.plot(strain4, stress4, label="High ρ at 1E5 Cycles", color="#0000b5")
+    plt.plot(strain1, y_line1, label="Fit Line, Low ρ Initial", linestyle='dashed', alpha=0.6, color="#ff0000")
+    plt.plot(strain2, y_line2, label="Fit Line, Low ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#b50000")
+    plt.plot(strain3, y_line3, label="Fit Line, High ρ Initial", linestyle='dashed', alpha=0.6, color="#0000ff")
+    plt.plot(strain4, y_line4, label="Fit Line, High ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#0000b5")
     plt.xlim([0, 0.3])
     plt.ylim([0, 0.2])
     plt.legend()
@@ -210,15 +238,41 @@ def plot_four_compression_data_figure4(strain1, stress1, strain2, stress2, strai
 
 
 def plot_four_compression_data(strain1, stress1, strain2, stress2, strain3, stress3, strain4, stress4, plot_title, file_name):
-    plt.figure(figsize=(8, 6))
+    """
+    """
+    # Get linear fits
+    linear_coeffs1 = np.polyfit(strain1[:230], stress1[:230], 1)
+    y_line1 = [i * linear_coeffs1[0] + linear_coeffs1[1] for i in strain1]
+    linear_coeffs2 = np.polyfit(strain2[:1000], stress2[:1000], 1)
+    y_line2 = [i * linear_coeffs2[0] + linear_coeffs2[1] for i in strain2]
+    linear_coeffs3 = np.polyfit(strain3[:100], stress3[:100], 1)
+    y_line3 = [i * linear_coeffs3[0] + linear_coeffs3[1] for i in strain3]
+    linear_coeffs4 = np.polyfit(strain4[:], stress4[:], 1)
+    y_line4 = [i * linear_coeffs4[0] + linear_coeffs4[1] for i in strain4]
+    # generate figure
+    fig, ax = plt.subplots(figsize=(8, 6))
     # pre process to adjust zero points
     strain1 = [i - 0.11 for i in strain1]
     strain3 = [i - 0.02 for i in strain3]
     strain4 = [i - 0.01 for i in strain4]
-    plt.plot(strain1, stress1, label="0.5 MPa Initial")
-    plt.plot(strain2, stress2, label="0.5 MPa at 1E5 Cycles")
-    plt.plot(strain3, stress3, label="5.0 MPa Initial")
-    plt.plot(strain4, stress4, label="5.0 MPa at 1E5 Cycles")
+    plt.plot(strain1, stress1, label="Low ρ Initial", color="#ff0000")
+    plt.plot(strain2, stress2, label="Low ρ at 1E5 Cycles", color="#b50000")
+    plt.plot(strain3, stress3, label="High ρ Initial", color="#0000ff")
+    plt.plot(strain4, stress4, label="High ρ at 1E5 Cycles", color="#0000b5")
+    plt.plot(strain1, y_line1, label="Fit Line, Low ρ Initial", linestyle='dashed', alpha=0.6, color="#ff0000")
+    plt.plot(strain2, y_line2, label="Fit Line, Low ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#b50000")
+    plt.plot(strain3, y_line3, label="Fit Line, High ρ Initial", linestyle='dashed', alpha=0.6, color="#0000ff")
+    plt.plot(strain4, y_line4, label="Fit Line, High ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#0000b5")
+
+    # place a text box in upper left in axes coords
+    # ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs1[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+    #     verticalalignment='top')
+    # ax.text(0.07, 0.88, "Young's Modulus: " + str(round(linear_coeffs2[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+    #     verticalalignment='top')
+    # ax.text(0.07, 0.84, "Young's Modulus: " + str(round(linear_coeffs3[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+    #     verticalalignment='top')
+    # ax.text(0.07, 0.8, "Young's Modulus: " + str(round(linear_coeffs4[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+    #     verticalalignment='top')
     plt.xlim([0, 0.3])
     plt.ylim([0, 0.2])
     plt.legend()
@@ -254,8 +308,51 @@ def plot_specific_compression_data(deformation_col, force_col):
     plt.show()
 
 
+def plot_SN_curve(cycles, mods, heights, plot_title, file_name):
+    """
+    """
+    # convert MPa moduli to kPa
+    mods = [i*1000 for i in mods]
+    # generate figure
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.scatter(cycles, mods, color='purple', label='Moduli')
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylabel('Compression Modulus [kPa]', color='purple')
+    ax.tick_params(axis='y', labelcolor='purple')
+    # Create second y-axis (right side)
+    ax2 = ax.twinx()
+    # Second scatter plot (right y-axis)
+    ax2.scatter(cycles, heights, color='green', label='Heights')
+    ax2.set_ylabel('Sample Height [mm]', color='green')
+    ax2.tick_params(axis='y', labelcolor='green')
+    plt.legend()
+    plt.grid()
+    ax.set_xlabel('220 N Compression Cycles')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+    return 0
+
+
 if __name__ == '__main__':
-    # Figure 4. Stress Strain Curves for Different Density
+    # file handling
+    set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_1k.csv", new_file_name="../data/0500kPa001SA003SP_1k_fixed.csv")
+    set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_10000cycles_to_20000cycles.csv", new_file_name="../data/0500kPa001SA003SP_10k_to_20k_fixed.csv")
+
+    # get density based on low strain of different samples
+    sample_moduli = [0.2, 0.5, 1, 2, 5] # MPa
+    density = 1.21 # grams/cm^3
+    TPU_max_modulus = 12 # MPa
+    sample_volume_fraction = [i/TPU_max_modulus for i in sample_moduli]
+    sample_density = [round(density*i,3) for i in sample_volume_fraction]
+    print("Density of Samples: \n")
+    print(sample_density)
+
+    # Figure 4A. Stress Strain Curve for One Cube over first 1000 cycles
+     
+
+    # Figure 4B. Stress Strain Curves for Different Density
     area = 900  # mm squared
     L0 = 30     # mm
     time1, disp1, force1, s_rows = load_file(file_name='../data/0500kPa001SA003SP_1k.csv')
@@ -271,7 +368,30 @@ if __name__ == '__main__':
     strain3, stress3 = get_positive_form(strain=strain3, stress=stress3)
     plot_four_compression_data(strain1[:230], stress1[:230], strain2, stress2, strain3[:100], stress3[:100], strain4, stress4, plot_title="Different Modulus in Cycled VTP Foam Stress to Strain", file_name="./figure4_0500kPa_to_5000kPa_comparison.png")
 
+
+    # Figure 5A. SN Curve for Compression of High and Low Density Foam
+    # first, get modulus at 10% strain for list of file names
+    comp_modulus_list = []
+    sample_height = [30.1, 29.8, 29.1, 29.0, 28.8]
+    file_names = ["../data/0500kPa001SA003SP_1k_fixed.csv", "../data/0500kPa001SA003SP_10k_to_20k_fixed.csv", "../data/0500kPa001SA006SP_100k.csv", "../data/0500kPa001SA006SP_200k.csv", "../data/0500kPa001SA006SP_1E6cycles_1.csv"]
+    cycles_list = [1000, 10000, 100000, 200000, 1000000]
+    for file in file_names:
+        _, disp1, force1, _ = load_file(file_name=file)
+        strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
+        # Get 10% strain modulus
+        index_at_strain = min(range(len(strain1)), key=lambda i: abs(strain1[i] - 0.2))
+        print("Index at strain: {}".format(index_at_strain))
+        modulus = np.average(stress1[index_at_strain-60:index_at_strain+60])/np.average(strain1[index_at_strain-60:index_at_strain+60])
+        comp_modulus_list.append(modulus)
+    # comp_modulus_list = [0.0]
+    plot_SN_curve(cycles_list, comp_modulus_list, heights=sample_height, plot_title="0.04 g/cm3 VTP Foam SN Curve", file_name="./SNcurve_test.png")
+
+    # Figure 5B. SN Curve for Flexural of High and Low Density Foam
+    # first, get modulus at 10% strain for 
+    #plot_SN_curve(cycle_list, modulus_list)
+
     quit()
+    # OTHER FIGURE GENERATION
 
     # Abrasion Slab Effective Modulus sample 12000 kPa Surface coat
     time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/6000kPa_E_Ab_12000kPaSurfaceCoat_002SP_1.csv')
