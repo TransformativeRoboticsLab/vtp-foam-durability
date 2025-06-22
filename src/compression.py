@@ -3,6 +3,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
+
+rcParams['font.family'] = 'Times New Roman'
+rcParams.update({'font.size': 14})
 
 
 def load_file(file_name):
@@ -91,6 +95,7 @@ def get_flexural_stress_strain_from_data(displacement, force, area, start_length
     sigma = [float(j)/(1000*area) for j in force]
     return epsilon, sigma
 
+
 def get_positive_form(strain, stress):
     """
     """
@@ -99,6 +104,7 @@ def get_positive_form(strain, stress):
     sigma = [-i for i in stress]
     print(sigma[-10:])
     return epsilon, sigma
+
 
 def plot_force_displacement(col1, col2, plot_title, file_name):
     """
@@ -155,6 +161,36 @@ def plot_compression_data(col1, col2, col3, plot_title, file_name):
     plt.savefig(file_name)
     plt.show()
     return 0
+
+
+def plot_compression_data_at_four_levels(col1, col2, col3, plot_title, file_name):
+    """
+    """
+    data_len = int(len(col2))
+    quarter_len = int(round(data_len/4,0))
+    half_len = int(round(data_len/2,0))
+    threequart_len = int(round(3*data_len/4,0))
+
+    # convert stress
+    col3 = [i for i in col3]
+    # Make plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.plot(col2[:210], col3[:210], label="First Cycle")
+    plt.plot(col2[quarter_len:quarter_len+210], col3[quarter_len:quarter_len+210], label="250th Cycle")
+    plt.plot(col2[half_len:half_len+210], col3[half_len:half_len+210], label="500th Cycle")
+    plt.plot(col2[threequart_len:threequart_len+210], col3[threequart_len:threequart_len+210], label="750th Cycle")
+    plt.plot(col2[-210:], col3[-210:], label="1000th Cycle")
+    plt.xlim([0, 0.25])
+    plt.ylim([0, 0.30])
+    plt.legend()
+    plt.grid()
+    plt.xlabel('Strain')
+    plt.ylabel('Stress [MPa]')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+    return 0
+
 
 
 def plot_3pointbend_data(col1, col2, col3, plot_title, file_name):
@@ -313,9 +349,14 @@ def plot_SN_curve(cycles, mods, heights, plot_title, file_name):
     """
     # convert MPa moduli to kPa
     mods = [i*1000 for i in mods]
+    # get polyfit lines
+    coeffs = np.polyfit(cycles, mods, deg=4)
+    print(coeffs)
+    fit_fn = [coeffs[0]**4 * i + coeffs[1]**3 * i + coeffs[2]**2 * i + coeffs[3] * i + coeffs[4] for i in cycles]
     # generate figure
     fig, ax = plt.subplots(figsize=(8, 6))
     plt.scatter(cycles, mods, color='purple', label='Moduli')
+    # plt.plot(cycles, fit_fn, color='black', linestyle='dashed')
     ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylabel('Compression Modulus [kPa]', color='purple')
@@ -335,6 +376,40 @@ def plot_SN_curve(cycles, mods, heights, plot_title, file_name):
     return 0
 
 
+def plot_two_SN_curves(cycles1, mods1, heights1, cycles2, mods2, heights2, plot_title, file_name):
+    """
+    """
+    # convert MPa moduli to kPa
+    mods1 = [i*1000 for i in mods1]
+    mods2 = [i*1000 for i in mods2]
+    # Generate figure
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.scatter(cycles1, mods1, color='#ff0000', label='Low Density Moduli')
+    plt.scatter(cycles2, mods2, color='#0000ff', label='High Density Moduli')
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylabel('Compression Modulus [kPa]', color='purple')
+    ax.tick_params(axis='y', labelcolor='purple')
+    # Create second y-axis (right side)
+    ax2 = ax.twinx()
+    # Second scatter plot (right y-axis)
+    ax2.scatter(cycles1, heights1, color='#00ff00', label='Heights')
+    ax2.scatter(cycles2, heights2, color="#007C00", label='Heights')
+
+    ax2.set_ylabel('Sample Height [mm]', color='#00ff00')
+    ax2.tick_params(axis='y', labelcolor='#00ff00')
+    
+    plt.legend()
+    plt.grid()
+    ax.set_xlabel('220 N Compression Cycles')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+    return 0
+
+
+
+
 if __name__ == '__main__':
     # file handling
     set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_1k.csv", new_file_name="../data/0500kPa001SA003SP_1k_fixed.csv")
@@ -350,7 +425,15 @@ if __name__ == '__main__':
     print(sample_density)
 
     # Figure 4A. Stress Strain Curve for One Cube over first 1000 cycles
-     
+    set_file_to_positive_force_displacement(file_name="../data/5000kPa001SA006SP_1.csv", new_file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
+
+    area = 900  # mm squared
+    L0 = 30     # mm
+    time1, disp1, force1, s_rows = load_file(file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
+    strain1 = [i-0.015 for i in strain1]
+    plot_compression_data_at_four_levels(col1=time1, col2=strain1, col3=stress1, plot_title="0.504 g/cm$^3$ VTP Cube Stress to Strain", file_name="./5000kPa001SA006SP_first_1k_cycles.png")
+
 
     # Figure 4B. Stress Strain Curves for Different Density
     area = 900  # mm squared
@@ -386,9 +469,9 @@ if __name__ == '__main__':
     # comp_modulus_list = [0.0]
     plot_SN_curve(cycles_list, comp_modulus_list, heights=sample_height, plot_title="0.04 g/cm3 VTP Foam SN Curve", file_name="./SNcurve_test.png")
 
-    # Figure 5B. SN Curve for Flexural of High and Low Density Foam
-    # first, get modulus at 10% strain for 
-    #plot_SN_curve(cycle_list, modulus_list)
+
+    # Figure 5B. SN Curve for compression of both High and Low Density Foam
+    
 
     quit()
     # OTHER FIGURE GENERATION
@@ -416,17 +499,17 @@ if __name__ == '__main__':
 
 
     # Filament pull data
-    # time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/TPU_filament_pull_1.csv')
-    # plot_force_displacement(col1=disp_filament, col2=force_filament, plot_title="Ninjaflex TPU 85A Filament Force to Displacement", file_name="./TPU_F_to_disp.png")
-    # area1 = 2.4 # mm squared
-    # L0_1 = 130 # mm
-    # strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
+    time_filament, disp_filament, force_filament, s_rows = load_file(file_name='../data/TPU_filament_pull_1.csv')
+    plot_force_displacement(col1=disp_filament, col2=force_filament, plot_title="Ninjaflex TPU 85A Filament Force to Displacement", file_name="./TPU_F_to_disp.png")
+    area1 = 2.4 # mm squared
+    L0_1 = 130 # mm
+    strain_filament, stress_filament = get_stress_strain_from_data(displacement=list(disp_filament), force=list(force_filament), area=area1, start_length=L0_1)
     # Convert to positive
-    # strain0 = [-i for i in strain0]
-    # strain1 = [-i for i in strain_filament]
-    # # stress0 = [-i for i in stress0]
-    # stress1 = [-i for i in stress_filament]
-    # plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="Ninjaflex TPU 85A Filament Stress to Strain", file_name="./TPU_filament_stress_strain.png")
+    strain0 = [-i for i in strain0]
+    strain1 = [-i for i in strain_filament]
+    # stress0 = [-i for i in stress0]
+    stress1 = [-i for i in stress_filament]
+    plot_compression_data(col1=time_filament, col2=strain_filament, col3=stress_filament, plot_title="Ninjaflex TPU 85A Filament Stress to Strain", file_name="./TPU_filament_stress_strain.png")
     
 
     # get_halved_csv_file("../data/5000kPa_001SA_run2_10000cycle_2.csv")
