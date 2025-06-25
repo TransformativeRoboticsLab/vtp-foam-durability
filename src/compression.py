@@ -432,7 +432,7 @@ if __name__ == '__main__':
     time1, disp1, force1, s_rows = load_file(file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
     strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
     strain1 = [i-0.015 for i in strain1]
-    plot_compression_data_at_four_levels(col1=time1, col2=strain1, col3=stress1, plot_title="0.504 g/cm$^3$ VTP Cube Stress to Strain", file_name="./5000kPa001SA006SP_first_1k_cycles.png")
+    plot_compression_data_at_four_levels(col1=time1, col2=strain1, col3=stress1, plot_title="High Density VTP Cube Stress to Strain", file_name="./5000kPa001SA006SP_first_1k_cycles.png")
 
 
     # Figure 4B. Stress Strain Curves for Different Density
@@ -467,7 +467,7 @@ if __name__ == '__main__':
         modulus = np.average(stress1[index_at_strain-60:index_at_strain+60])/np.average(strain1[index_at_strain-60:index_at_strain+60])
         comp_modulus_list.append(modulus)
     # comp_modulus_list = [0.0]
-    plot_SN_curve(cycles_list, comp_modulus_list, heights=sample_height, plot_title="0.04 g/cm3 VTP Foam SN Curve", file_name="./SNcurve_test.png")
+    plot_SN_curve(cycles_list, comp_modulus_list, heights=sample_height, plot_title="Low Density VTP Foam Modulus to Cycles Curve", file_name="./SNcurve_test.png")
 
 
     # Figure 5B. SN Curve for compression of both High and Low Density Foam
