@@ -139,10 +139,13 @@ def plot_force_displacement(col1, col2, plot_title, file_name):
 def plot_compression_data(col1, col2, col3, plot_title, file_name):
     """
     """
-    # convert stress
+    # convert stress if necessary
     col3 = [i for i in col3]
-    # Get initial linear fit
-    linear_coeffs = np.polyfit(col2[:], col3[:], 1)
+    # get 5% and 15% strain points
+    five_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.05))
+
+    # Get linear fit
+    linear_coeffs = np.polyfit(col2[five_percent_index:], col3[five_percent_index:], 1)
     y_line = [i * linear_coeffs[0] + linear_coeffs[1] for i in col2]
     # Make plot
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -411,6 +414,29 @@ def plot_two_SN_curves(cycles1, mods1, heights1, cycles2, mods2, heights2, plot_
 
 
 if __name__ == '__main__':
+    # Effective Modulus Samples
+    area = 900  # mm squared
+    L0 = 30     # mm
+    t1, disp1, force1, s_rows = load_file(file_name='../data/VTP_testing/PLA_high_effective_001_1.csv')
+    t2, disp2, force2, s_rows = load_file(file_name='../data/VTP_testing/PLA_low_effective_001_1.csv')
+    t3, disp3, force3, s_rows = load_file(file_name='../data/VTP_testing/TPU_high_effective_001_1.csv')
+    t4, disp4, force4, s_rows = load_file(file_name='../data/VTP_testing/TPU_mean_effective_001_1.csv')
+    t5, disp5, force5, s_rows = load_file(file_name='../data/VTP_testing/TPU_median_effective_001_1.csv')
+
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
+    strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area, start_length=L0)
+    strain3, stress3 = get_stress_strain_from_data(displacement=list(disp3), force=list(force3), area=area, start_length=L0)
+    strain4, stress4 = get_stress_strain_from_data(displacement=list(disp4), force=list(force4), area=area, start_length=L0)
+    strain5, stress5 = get_stress_strain_from_data(displacement=list(disp5), force=list(force5), area=area, start_length=L0)
+
+    plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="PLA High Effective 001", file_name="./PLA_HIGH_EFFECTIVE_001.png")
+    plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="PLA Low Effective 001", file_name="./PLA_LOW_EFFECTIVE_001.png")
+    plot_compression_data(col1=t3, col2=strain3, col3=stress3, plot_title="TPU High Effective 001", file_name="./TPU_HIGH_EFFECTIVE_001.png")
+    plot_compression_data(col1=t4, col2=strain4, col3=stress4, plot_title="TPU Mean Effective 001", file_name="./TPU_MEAN_EFFECTIVE_001.png")
+    plot_compression_data(col1=t5, col2=strain5, col3=stress5, plot_title="TPU Median Effective 001", file_name="./TPU_MEDIAN_EFFECTIVE_001.png")
+
+
+    quit()
     # file handling
     set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_1k.csv", new_file_name="../data/0500kPa001SA003SP_1k_fixed.csv")
     set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_10000cycles_to_20000cycles.csv", new_file_name="../data/0500kPa001SA003SP_10k_to_20k_fixed.csv")
