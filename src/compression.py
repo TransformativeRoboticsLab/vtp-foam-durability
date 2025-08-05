@@ -141,11 +141,15 @@ def plot_compression_data(col1, col2, col3, plot_title, file_name):
     """
     # convert stress if necessary
     col3 = [i for i in col3]
+    # adjust strain
+    col2 = [i-0.01 for i in col2]
     # get 5% and 15% strain points
     five_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.05))
+    six_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.06))
+    ten_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.10))
 
     # Get linear fit
-    linear_coeffs = np.polyfit(col2[five_percent_index:], col3[five_percent_index:], 1)
+    linear_coeffs = np.polyfit(col2[five_percent_index:six_percent_index], col3[five_percent_index:six_percent_index], 1)
     y_line = [i * linear_coeffs[0] + linear_coeffs[1] for i in col2]
     # Make plot
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -414,6 +418,19 @@ def plot_two_SN_curves(cycles1, mods1, heights1, cycles2, mods2, heights2, plot_
 
 
 if __name__ == '__main__':
+    area0 = 400  # mm squared
+    area1 = 350 # mm squared
+    L0 = 20     # mm
+    L1 = 13     # mm
+    t1, disp1, force1, s_rows = load_file(file_name='../data/PLA_copper_1point6mmlines_25percentvolume_gyroid_1.csv')
+    t2, disp2, force2, s_rows = load_file(file_name='../data/PLA_mean_copper_VTP_specimen001_20250722_1kN_1.csv')
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area0, start_length=L0)
+    strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area1, start_length=L1)
+    plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="Copper PLA 1.6mm Line Thickness 25% Volume Fraction", file_name="./copper_1p6mm_gyroid_25percent_001.png")
+    plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="Copper PLA Model Mean VTP Specimen 001", file_name="./copper_PLA_VTP_001.png")
+    
+    quit()
+
     # Effective Modulus Samples
     area = 900  # mm squared
     L0 = 30     # mm
