@@ -154,10 +154,10 @@ def plot_compression_data(col1, col2, col3, plot_title, file_name):
     # Make plot
     fig, ax = plt.subplots(figsize=(8, 6))
     plt.plot(col2, col3, label="Sample")
-    plt.plot(col2, y_line, label="Linear Fit", linestyle='dashed')
+    # plt.plot(col2, y_line, label="Linear Fit", linestyle='dashed')
     # place a text box in upper left in axes coords
-    ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
-        verticalalignment='top')
+    # ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+    #    verticalalignment='top')
     # plt.xlim([0, 0.5])
     # plt.ylim([0, 0.01])
     plt.legend()
@@ -168,6 +168,34 @@ def plot_compression_data(col1, col2, col3, plot_title, file_name):
     plt.savefig(file_name)
     plt.show()
     return 0
+
+def plot_shear_data(col1, col2, col3, plot_title, file_name):
+    """
+    """
+    # convert stress if necessary
+    col3 = [-i*1000 for i in col3]
+    # adjust strain
+    col2 = [-i for i in col2]
+    # # get 5% and 15% strain points
+    # five_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.05))
+    # six_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.06))
+    # ten_percent_index = min(range(len(col2)), key=lambda i: abs(col2[i] - 0.10))
+    # # Get linear fit
+    # linear_coeffs = np.polyfit(col2[five_percent_index:six_percent_index], col3[five_percent_index:six_percent_index], 1)
+    # y_line = [i * linear_coeffs[0] + linear_coeffs[1] for i in col2]
+    # Make plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    plt.plot(col2[:100], col3[:100], label="First Cycle")
+    plt.plot(col2[-100:], col3[-100:], label="1000th Cycle")
+    plt.legend()
+    plt.grid()
+    plt.xlabel('Shear Strain')
+    plt.ylabel('Shear Stress [MPa]')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+    return 0
+
 
 
 def plot_compression_data_at_four_levels(col1, col2, col3, plot_title, file_name):
@@ -182,13 +210,13 @@ def plot_compression_data_at_four_levels(col1, col2, col3, plot_title, file_name
     col3 = [i for i in col3]
     # Make plot
     fig, ax = plt.subplots(figsize=(8, 6))
-    plt.plot(col2[:210], col3[:210], label="First Cycle")
-    plt.plot(col2[quarter_len:quarter_len+210], col3[quarter_len:quarter_len+210], label="250th Cycle")
-    plt.plot(col2[half_len:half_len+210], col3[half_len:half_len+210], label="500th Cycle")
-    plt.plot(col2[threequart_len:threequart_len+210], col3[threequart_len:threequart_len+210], label="750th Cycle")
-    plt.plot(col2[-210:], col3[-210:], label="1000th Cycle")
-    plt.xlim([0, 0.25])
-    plt.ylim([0, 0.30])
+    plt.plot(col2[:500], col3[:500], label="First Cycle")
+    plt.plot(col2[quarter_len:quarter_len+500], col3[quarter_len:quarter_len+500], label="250th Cycle")
+    plt.plot(col2[half_len:half_len+500], col3[half_len:half_len+500], label="500th Cycle")
+    plt.plot(col2[threequart_len:threequart_len+500], col3[threequart_len:threequart_len+500], label="750th Cycle")
+    plt.plot(col2[-500:0], col3[-500:0], label="1000th Cycle")
+    # plt.xlim([0, 0.25])
+    # plt.ylim([0, 0.30])
     plt.legend()
     plt.grid()
     plt.xlabel('Strain')
@@ -302,10 +330,10 @@ def plot_four_compression_data(strain1, stress1, strain2, stress2, strain3, stre
     plt.plot(strain2, stress2, label="Low ρ at 1E5 Cycles", color="#b50000")
     plt.plot(strain3, stress3, label="High ρ Initial", color="#0000ff")
     plt.plot(strain4, stress4, label="High ρ at 1E5 Cycles", color="#0000b5")
-    plt.plot(strain1, y_line1, label="Fit Line, Low ρ Initial", linestyle='dashed', alpha=0.6, color="#ff0000")
-    plt.plot(strain2, y_line2, label="Fit Line, Low ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#b50000")
-    plt.plot(strain3, y_line3, label="Fit Line, High ρ Initial", linestyle='dashed', alpha=0.6, color="#0000ff")
-    plt.plot(strain4, y_line4, label="Fit Line, High ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#0000b5")
+    # plt.plot(strain1, y_line1, label="Fit Line, Low ρ Initial", linestyle='dashed', alpha=0.6, color="#ff0000")
+    # plt.plot(strain2, y_line2, label="Fit Line, Low ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#b50000")
+    # plt.plot(strain3, y_line3, label="Fit Line, High ρ Initial", linestyle='dashed', alpha=0.6, color="#0000ff")
+    # plt.plot(strain4, y_line4, label="Fit Line, High ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#0000b5")
 
     # place a text box in upper left in axes coords
     # ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs1[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
@@ -418,58 +446,56 @@ def plot_two_SN_curves(cycles1, mods1, heights1, cycles2, mods2, heights2, plot_
 
 
 if __name__ == '__main__':
-    area0 = 400  # mm squared
-    area1 = 350 # mm squared
-    L0 = 20     # mm
-    L1 = 13     # mm
-    t1, disp1, force1, s_rows = load_file(file_name='../data/PLA_copper_1point6mmlines_25percentvolume_gyroid_1.csv')
-    t2, disp2, force2, s_rows = load_file(file_name='../data/PLA_mean_copper_VTP_specimen001_20250722_1kN_1.csv')
-    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area0, start_length=L0)
-    strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area1, start_length=L1)
-    plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="Copper PLA 1.6mm Line Thickness 25% Volume Fraction", file_name="./copper_1p6mm_gyroid_25percent_001.png")
-    plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="Copper PLA Model Mean VTP Specimen 001", file_name="./copper_PLA_VTP_001.png")
+    # Metal samples
+    # area0 = 400  # mm squared
+    # area1 = 350 # mm squared
+    # L0 = 20     # mm
+    # L1 = 13     # mm
+    # t1, disp1, force1, s_rows = load_file(file_name='../data/PLA_copper_1point6mmlines_25percentvolume_gyroid_1.csv')
+    # t2, disp2, force2, s_rows = load_file(file_name='../data/PLA_mean_copper_VTP_specimen001_20250722_1kN_1.csv')
+    # strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area0, start_length=L0)
+    # strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area1, start_length=L1)
+    # plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="Copper PLA 1.6mm Line Thickness 25% Volume Fraction", file_name="./copper_1p6mm_gyroid_25percent_001_nofit.png")
+    # plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="Copper PLA Model Mean VTP Specimen 001", file_name="./copper_PLA_VTP_001_nofit.png")
     
-    quit()
 
     # Effective Modulus Samples
-    area = 900  # mm squared
-    L0 = 30     # mm
-    t1, disp1, force1, s_rows = load_file(file_name='../data/VTP_testing/PLA_high_effective_001_1.csv')
-    t2, disp2, force2, s_rows = load_file(file_name='../data/VTP_testing/PLA_low_effective_001_1.csv')
-    t3, disp3, force3, s_rows = load_file(file_name='../data/VTP_testing/TPU_high_effective_001_1.csv')
-    t4, disp4, force4, s_rows = load_file(file_name='../data/VTP_testing/TPU_mean_effective_001_1.csv')
-    t5, disp5, force5, s_rows = load_file(file_name='../data/VTP_testing/TPU_median_effective_001_1.csv')
+    # area = 900  # mm squared
+    # L0 = 30     # mm
+    # t1, disp1, force1, s_rows = load_file(file_name='../data/VTP_testing/PLA_high_effective_001_1.csv')
+    # t2, disp2, force2, s_rows = load_file(file_name='../data/VTP_testing/PLA_low_effective_001_1.csv')
+    # t3, disp3, force3, s_rows = load_file(file_name='../data/VTP_testing/TPU_high_effective_001_1.csv')
+    # t4, disp4, force4, s_rows = load_file(file_name='../data/VTP_testing/TPU_mean_effective_001_1.csv')
+    # t5, disp5, force5, s_rows = load_file(file_name='../data/VTP_testing/TPU_median_effective_001_1.csv')
 
-    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
-    strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area, start_length=L0)
-    strain3, stress3 = get_stress_strain_from_data(displacement=list(disp3), force=list(force3), area=area, start_length=L0)
-    strain4, stress4 = get_stress_strain_from_data(displacement=list(disp4), force=list(force4), area=area, start_length=L0)
-    strain5, stress5 = get_stress_strain_from_data(displacement=list(disp5), force=list(force5), area=area, start_length=L0)
+    # strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
+    # strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area, start_length=L0)
+    # strain3, stress3 = get_stress_strain_from_data(displacement=list(disp3), force=list(force3), area=area, start_length=L0)
+    # strain4, stress4 = get_stress_strain_from_data(displacement=list(disp4), force=list(force4), area=area, start_length=L0)
+    # strain5, stress5 = get_stress_strain_from_data(displacement=list(disp5), force=list(force5), area=area, start_length=L0)
 
-    plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="PLA High Effective 001", file_name="./PLA_HIGH_EFFECTIVE_001.png")
-    plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="PLA Low Effective 001", file_name="./PLA_LOW_EFFECTIVE_001.png")
-    plot_compression_data(col1=t3, col2=strain3, col3=stress3, plot_title="TPU High Effective 001", file_name="./TPU_HIGH_EFFECTIVE_001.png")
-    plot_compression_data(col1=t4, col2=strain4, col3=stress4, plot_title="TPU Mean Effective 001", file_name="./TPU_MEAN_EFFECTIVE_001.png")
-    plot_compression_data(col1=t5, col2=strain5, col3=stress5, plot_title="TPU Median Effective 001", file_name="./TPU_MEDIAN_EFFECTIVE_001.png")
+    # plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="PLA High Effective 001", file_name="./PLA_HIGH_EFFECTIVE_001.png")
+    # plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="PLA Low Effective 001", file_name="./PLA_LOW_EFFECTIVE_001.png")
+    # plot_compression_data(col1=t3, col2=strain3, col3=stress3, plot_title="TPU High Effective 001", file_name="./TPU_HIGH_EFFECTIVE_001.png")
+    # plot_compression_data(col1=t4, col2=strain4, col3=stress4, plot_title="TPU Mean Effective 001", file_name="./TPU_MEAN_EFFECTIVE_001.png")
+    # plot_compression_data(col1=t5, col2=strain5, col3=stress5, plot_title="TPU Median Effective 001", file_name="./TPU_MEDIAN_EFFECTIVE_001.png")
 
-
-    quit()
-    # file handling
-    set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_1k.csv", new_file_name="../data/0500kPa001SA003SP_1k_fixed.csv")
-    set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_10000cycles_to_20000cycles.csv", new_file_name="../data/0500kPa001SA003SP_10k_to_20k_fixed.csv")
+    # # file handling
+    # set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_1k.csv", new_file_name="../data/0500kPa001SA003SP_1k_fixed.csv")
+    # set_file_to_positive_force_displacement(file_name="../data/0500kPa001SA003SP_10000cycles_to_20000cycles.csv", new_file_name="../data/0500kPa001SA003SP_10k_to_20k_fixed.csv")
 
     # get density based on low strain of different samples
-    sample_moduli = [0.2, 0.5, 1, 2, 5] # MPa
-    density = 1.21 # grams/cm^3
-    TPU_max_modulus = 12 # MPa
-    sample_volume_fraction = [i/TPU_max_modulus for i in sample_moduli]
-    sample_density = [round(density*i,3) for i in sample_volume_fraction]
-    print("Density of Samples: \n")
-    print(sample_density)
+    # sample_moduli = [0.2, 0.5, 1, 2, 5] # MPa
+    # density = 1.21 # grams/cm^3
+    # TPU_max_modulus = 12 # MPa
+    # sample_volume_fraction = [i/TPU_max_modulus for i in sample_moduli]
+    # sample_density = [round(density*i,3) for i in sample_volume_fraction]
+    # print("Density of Samples: \n")
+    # print(sample_density)
 
-    # Figure 4A. Stress Strain Curve for One Cube over first 1000 cycles
-    set_file_to_positive_force_displacement(file_name="../data/5000kPa001SA006SP_1.csv", new_file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
 
+    # # Figure 4A. Stress Strain Curve for One Cube over first 1000 cycles
+    # set_file_to_positive_force_displacement(file_name="../data/5000kPa001SA006SP_1.csv", new_file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
     area = 900  # mm squared
     L0 = 30     # mm
     time1, disp1, force1, s_rows = load_file(file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
@@ -494,6 +520,14 @@ if __name__ == '__main__':
     strain3, stress3 = get_positive_form(strain=strain3, stress=stress3)
     plot_four_compression_data(strain1[:230], stress1[:230], strain2, stress2, strain3[:100], stress3[:100], strain4, stress4, plot_title="Different Modulus in Cycled VTP Foam Stress to Strain", file_name="./figure4_0500kPa_to_5000kPa_comparison.png")
 
+    # # Figure 4C. Stress Strain Curve for low Cube over first 1000 cycles
+    # set_file_to_positive_force_displacement(file_name="../data/5000kPa001SA006SP_1.csv", new_file_name="../data/5000kPa001SA006SP_1k_fixed.csv")
+    area = 900  # mm squared
+    L0 = 30     # mm
+    time1, disp1, force1, s_rows = load_file(file_name="../data/0500kPa001SA003SP_1k_fixed.csv")
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L0)
+    strain1 = [i-0.015 for i in strain1]
+    plot_compression_data_at_four_levels(col1=time1, col2=strain1, col3=stress1, plot_title="Low Density VTP Cube Stress to Strain", file_name="./0500kPa001SA006SP_first_1k_cycles.png")
 
     # Figure 5A. SN Curve for Compression of High and Low Density Foam
     # first, get modulus at 10% strain for list of file names
@@ -514,6 +548,14 @@ if __name__ == '__main__':
 
 
     # Figure 5B. SN Curve for compression of both High and Low Density Foam
+    
+    # Figure 6. Flexural Curve
+    # Effective Modulus Samples
+    area = 900  # mm squared
+    L0 = 30     # mm
+    t1, disp_3pb, force_3pb, s_rows = load_file(file_name='../data/0500kPa001SA003SP_Ab_flexural_1_1.csv')
+    strain5, stress5 = get_stress_strain_from_data(displacement=list(disp_3pb), force=list(force_3pb), area=area, start_length=L0)
+    plot_shear_data(col1=t1, col2=strain5, col3=stress5, plot_title="Low Density VTP Foam Cube Shear Stress and Strain", file_name="./figure6_0500kPa_shear.png")
     
 
     quit()
