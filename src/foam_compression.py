@@ -1,5 +1,6 @@
 # VTP Compression Durability Analysis
 # Jacob Miske
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -196,8 +197,6 @@ def plot_shear_data(col1, col2, col3, plot_title, file_name):
     plt.show()
     return 0
 
-
-
 def plot_compression_data_at_four_levels(col1, col2, col3, plot_title, file_name):
     """
     """
@@ -225,8 +224,6 @@ def plot_compression_data_at_four_levels(col1, col2, col3, plot_title, file_name
     plt.savefig(file_name)
     plt.show()
     return 0
-
-
 
 def plot_3pointbend_data(col1, col2, col3, plot_title, file_name):
     """
@@ -268,6 +265,46 @@ def plot_all_compression_data(col1, col2, col3, col1_2, col2_2, col3_2, plot_tit
     plt.grid()
     plt.xlabel('Strain')
     plt.ylabel('Stress [kPa]')
+    plt.title(plot_title)
+    plt.savefig(file_name)
+    plt.show()
+
+
+def plot_three_compression_data(strain1, stress1, strain2, stress2, strain3, stress3, plot_title, file_name):
+    """
+    """
+    # Get linear fits
+    linear_coeffs1 = np.polyfit(strain1[-500:], stress1[-500:], 1)
+    y_line1 = [i * linear_coeffs1[0] + linear_coeffs1[1] for i in strain1]
+    linear_coeffs2 = np.polyfit(strain2[-500:], stress2[-500:], 1)
+    y_line2 = [i * linear_coeffs2[0] + linear_coeffs2[1] for i in strain2]
+    linear_coeffs3 = np.polyfit(strain3[-500:], stress3[-500:], 1)
+    y_line3 = [i * linear_coeffs3[0] + linear_coeffs3[1] for i in strain3]
+    # generate figure
+    fig, ax = plt.subplots(figsize=(8, 6))
+    # pre process to adjust zero points
+    # strain1 = [i - 0.01 for i in strain1]
+    # strain3 = [i - 0.01 for i in strain3]
+    # strain4 = [i - 0.01 for i in strain4]
+    plt.plot(strain1, stress1, label="1001002_4", color="#ff0000")
+    plt.plot(strain2, stress2, label="1001002_5", color="#00FF00")
+    plt.plot(strain3, stress3, label="1001002_6", color="#0000ff")
+    plt.plot(strain1, y_line1, label="Fit Line, 1001002_4", linestyle='dashed', alpha=0.6, color="#ff0000")
+    plt.plot(strain2, y_line2, label="Fit Line, 1001002_5", linestyle='dashed', alpha=0.6, color="#00FF00")
+    plt.plot(strain3, y_line3, label="Fit Line, 1001002_5", linestyle='dashed', alpha=0.6, color="#0000ff")
+    # plt.plot(strain4, y_line4, label="Fit Line, High ρ 1E5 Cycles", linestyle='dashed', alpha=0.6, color="#0000b5")
+
+    # place a text box in upper left in axes coords
+    ax.text(0.07, 0.92, "Young's Modulus: " + str(round(linear_coeffs1[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+    ax.text(0.07, 0.88, "Young's Modulus: " + str(round(linear_coeffs2[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+    ax.text(0.07, 0.84, "Young's Modulus: " + str(round(linear_coeffs3[0], 2)) + " MPa", transform=ax.transAxes, fontsize=14,
+        verticalalignment='top')
+    
+    plt.grid()
+    plt.xlabel('Strain')
+    plt.ylabel('Stress [MPa]')
     plt.title(plot_title)
     plt.savefig(file_name)
     plt.show()
@@ -446,6 +483,22 @@ def plot_two_SN_curves(cycles1, mods1, heights1, cycles2, mods2, heights2, plot_
 
 
 if __name__ == '__main__':
+    print(os.getcwd())
+    area = 625 # mm squared
+    L = 22 # mm
+    t1, disp1, force1, s_rows = load_file(file_name='1001002_4_1.csv')
+    t2, disp2, force2, s_rows = load_file(file_name='1001002_5_1.csv')
+    t3, disp3, force3, s_rows = load_file(file_name='1001002_6_1.csv')
+    strain1, stress1 = get_stress_strain_from_data(displacement=list(disp1), force=list(force1), area=area, start_length=L)
+    strain2, stress2 = get_stress_strain_from_data(displacement=list(disp2), force=list(force2), area=area, start_length=L)
+    strain3, stress3 = get_stress_strain_from_data(displacement=list(disp3), force=list(force3), area=area, start_length=L)
+    plot_compression_data(col1=t1, col2=strain1, col3=stress1, plot_title="Copper VTP Foam 56% Vf 1001002_4_1", file_name="./figures/compression_1001002_4_1.png")
+    plot_compression_data(col1=t2, col2=strain2, col3=stress2, plot_title="Copper VTP Foam 56% Vf 1001002_5_1", file_name="./figures/compression_1001002_5_1.png")
+    plot_compression_data(col1=t3, col2=strain3, col3=stress3, plot_title="Copper VTP Foam 56% Vf 1001002_6_1", file_name="./figures/compression_1001002_6_1.png")
+    plot_three_compression_data(strain1, stress1, strain2, stress2, strain3, stress3, plot_title="All Three Copper VTP Foam at 56% Vf", file_name="./figures/VTP_copper_56Vf_comparison.png")
+
+    quit()
+
     # Metal samples
     # area0 = 400  # mm squared
     # area1 = 350 # mm squared
